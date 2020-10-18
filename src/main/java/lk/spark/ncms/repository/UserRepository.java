@@ -27,10 +27,16 @@ public class UserRepository {
 
             if(rs.next() == true){
 
-                name = "Welcome " + (rs.getString("name"));
+                if(rs.getInt("moh") == 1){
+                    name = "Welcome MOH " + (rs.getString("name"));
+                }else if (rs.getInt("hospital") == 1){
+                    name = "Welcome Hospital " + (rs.getString("name"));
+                }else {
+                    name = "Welcome " + (rs.getString("name"));
+                }
 
             }else{
-                name = "User Loging Failed";
+                name = "User Login Failed";
 
             }
 
