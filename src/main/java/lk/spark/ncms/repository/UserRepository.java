@@ -1,6 +1,5 @@
 package lk.spark.ncms.repository;
 
-import lk.spark.ncms.dao.User;
 import lk.spark.ncms.db.DBConnectionPool;
 
 import java.sql.Connection;
@@ -10,17 +9,18 @@ import java.sql.SQLException;
 
 public class UserRepository {
 
-    public String userSignin(String userName, String password){
+    public String[] userSignin(String userName, String password) throws SQLException {
 
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement stmt = null;
         String name = null;
+        String[] result = new String[2];
 
         try {
 
             con = DBConnectionPool.getInstance().getConnection();
-            stmt = con.prepareStatement("SELECT name FROM user WHERE user.username = ? AND user.password = ?");
+            stmt = con.prepareStatement("SELECT * FROM user WHERE user.username = ? AND user.password = ?");
             stmt.setString(1, userName);
             stmt.setString(2, password);
             rs = stmt.executeQuery();
@@ -28,15 +28,17 @@ public class UserRepository {
             if(rs.next() == true){
 
                 if(rs.getInt("moh") == 1){
-                    name = "Welcome MOH " + (rs.getString("name"));
+                     result[1] = "moh";
                 }else if (rs.getInt("hospital") == 1){
-                    name = "Welcome Hospital " + (rs.getString("name"));
+                    DocotorRepository docotorRepository = new DocotorRepository();
+                    result = docotorRepository.getLoginDetails(userName);
+                    name = "hospital";
                 }else {
-                    name = "Welcome " + (rs.getString("name"));
+                    result[1] = "patient";
                 }
 
             }else{
-                name = "User Login Failed";
+                result[0] = "User Login Failed";
 
             }
 
@@ -51,10 +53,10 @@ public class UserRepository {
             DBConnectionPool.getInstance().close(con);
         }
 
-        return name;
+        return result;
     }
 
-    public String userSignup(User userInformation){
+    public String userSignup(String userName, String password, String name, int moh, int hospital){
 
         ResultSet rs = null;
         Connection con = null;
@@ -65,11 +67,11 @@ public class UserRepository {
 
             con = DBConnectionPool.getInstance().getConnection();
             stmt = con.prepareStatement("INSERT INTO user (username, password, name, moh, hospital) VALUES (?, ?, ?, ?, ?)");
-            stmt.setString(1, userInformation.getUserName());
-            stmt.setString(2, userInformation.getPassword());
-            stmt.setString(3, userInformation.getName());
-            stmt.setInt(4, userInformation.getMoh());
-            stmt.setInt(5, userInformation.getHospital());
+            stmt.setString(1, userName);
+            stmt.setString(2, password);
+            stmt.setString(3, name);
+            stmt.setInt(4, moh);
+            stmt.setInt(5, hospital);
 
             resultRegister = stmt.executeUpdate();
 
@@ -82,6 +84,40 @@ public class UserRepository {
             DBConnectionPool.getInstance().close(stmt);
             DBConnectionPool.getInstance().close(con);
         }
-        return resultRegister == 1 ? userInformation.getName() + " Registered Successfully" : "User Registration Failed";
+        return resultRegister == 1 ? "Registered Successfully" : "Registration Failed";
+    }
+
+    public String getEmail(String userName){
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement stmt = null;
+        String email = null;
+
+        try {
+            con = DBConnectionPool.getInstance().getConnection();
+            stmt = con.prepareStatement("SELECT * FROM user WHERE username = ?");
+            stmt.setString(1, userName);
+            rs = stmt.executeQuery();
+
+            if(rs.next() == true){
+                email = rs.getString("password");
+
+            }else {
+                email = "Not Found";
+            }
+
+
+        }catch (SQLException e){
+
+            e.printStackTrace();
+
+        }finally {
+
+            DBConnectionPool.getInstance().close(rs);
+            DBConnectionPool.getInstance().close(stmt);
+            DBConnectionPool.getInstance().close(con);
+        }
+
+        return email;
     }
 }

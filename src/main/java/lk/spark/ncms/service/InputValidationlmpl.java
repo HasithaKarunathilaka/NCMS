@@ -4,6 +4,8 @@ import lk.spark.ncms.dao.Hospital;
 import lk.spark.ncms.dao.Patient;
 import lk.spark.ncms.dao.User;
 
+import java.sql.SQLException;
+
 public class InputValidationlmpl implements InputValidation{
 
 //    private String name;
@@ -36,21 +38,35 @@ public class InputValidationlmpl implements InputValidation{
     }
 
     @Override
-    public String validationPatientRegister(String firstName, String lastName, String district, String xCoordinate, String yCoordinate, String gender, String contact, String email, String age) {
+    public String[] validationPatientRegister(String firstName, String lastName, String district, String xCoordinate, String yCoordinate, String gender, String contact, String email, String age) {
 
+        String [] result = new String[2];
         if(firstName.isEmpty() || lastName.isEmpty() || district.isEmpty() || xCoordinate.isEmpty() || yCoordinate.isEmpty() || gender.isEmpty() || contact.isEmpty() || email.isEmpty() || age.isEmpty()){
-            return "Please Fill the All Fields";
+            result[0] = "Please Fill the All Fields";
+            return result;
 
         }else {
 
             try {
-                Patient patient = new Patient(firstName,lastName,district,Integer.parseInt(xCoordinate),Integer.parseInt(yCoordinate),gender,contact,email,Integer.parseInt(age));
+//                Patient patient = new Patient(firstName,lastName,district,Integer.parseInt(xCoordinate),Integer.parseInt(yCoordinate),gender,contact,email,Integer.parseInt(age));
+                Patient patient = new Patient();
+                patient.setFirstName(firstName);
+                patient.setLastName(lastName);
+                patient.setDistrict(district);
+                patient.setxCoordinate(Integer.parseInt(xCoordinate));
+                patient.setyCoordinate(Integer.parseInt(yCoordinate));
+                patient.setGender(gender);
+                patient.setContact(contact);
+                patient.setEmail(email);
+                patient.setAge(Integer.parseInt(age));
+
                 PatientService patientService = new PatientServicelmpl();
-                String result = (String) patientService.registerPatient(patient);
+                result = patientService.registerPatient(patient);
                 return result;
 
             }catch (NumberFormatException e){
-                return "Please Input in Valid Format";
+                result[0] = "Please Input in Valid Format";
+                return result;
             }
         }
     }
@@ -65,23 +81,25 @@ public class InputValidationlmpl implements InputValidation{
             try {
                 User userInformation = new User(username,password,name,Integer.parseInt(moh),Integer.parseInt(hospital));
                 UserService userService = new UserServicelmpl();
-                String result = (String) userService.signupUser(userInformation);
-                return result;
+//                String result = (String) userService.signupUser(userInformation);
+//                return result;
 
             }catch (NumberFormatException e){
                 return "Please Input in Valid Format";
             }
         }
-//        return null;
+        return null;
     }
 
     @Override
-    public String validationSignInUser(String username, String password) {
+    public String[] validationSignInUser(String username, String password) throws SQLException {
+        String[] result = new String[2];
         if(username.isEmpty() || password.isEmpty()){
-            return "Please Fill the All Fields";
+            result[0] = "Please Fill the All Fields";
+            return result;
         }else{
             UserService userService = new UserServicelmpl();
-            String result = userService.signinUser(username, password);
+            result = userService.signinUser(username, password);
             return result;
         }
 //        return null;

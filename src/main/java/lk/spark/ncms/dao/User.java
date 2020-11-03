@@ -1,5 +1,11 @@
 package lk.spark.ncms.dao;
 
+import lk.spark.ncms.db.DBConnectionPool;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 public class User {
 
     private String userName;
@@ -14,6 +20,10 @@ public class User {
         this.name = name;
         this.moh = moh;
         this.hospital = hospital;
+    }
+
+    public User(String userName){
+        this.userName = userName;
     }
 
     public String getUserName() {
@@ -34,5 +44,18 @@ public class User {
 
     public int getHospital() {
         return hospital;
+    }
+
+    public void getData(){
+        try {
+            Connection con = DBConnectionPool.getInstance().getConnection();
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+
+            stmt = con.prepareStatement("SELECT * FROM user WHERE username=?");
+            rs = stmt.executeQuery();
+        } catch (Exception exception){
+
+        }
     }
 }

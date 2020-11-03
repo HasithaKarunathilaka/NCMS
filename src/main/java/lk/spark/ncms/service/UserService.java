@@ -1,10 +1,10 @@
 package lk.spark.ncms.service;
 
-import lk.spark.ncms.dao.User;
+import java.sql.SQLException;
 
 public interface UserService {
 
-    public String signinUser(String userName, String password);
+    public String[] signinUser(String userName, String password) throws SQLException;
 
-    public String signupUser(User userInformation);
+//    public String signupUser(User userInformation);
 }

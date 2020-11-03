@@ -24,6 +24,11 @@
         <url-pattern>/registerPatient/*</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>PatientServlet</servlet-name>
+        <url-pattern>/patient/list</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>UserServlet</servlet-name>
         <servlet-class>lk.spark.ncms.controller.UserServlet</servlet-class>
@@ -32,6 +37,41 @@
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/user</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DoctorServlet</servlet-name>
+        <servlet-class>lk.spark.ncms.controller.DoctorServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DoctorServlet</servlet-name>
+        <url-pattern>/doctor/dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DoctorServlet</servlet-name>
+        <url-pattern>/doctor/addDoctor</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DoctorServlet</servlet-name>
+        <url-pattern>/doctor/doctorDetails</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MohServlet</servlet-name>
+        <servlet-class>lk.spark.ncms.controller.MohServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MohServlet</servlet-name>
+        <url-pattern>/moh/queueDetails</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StatisticServlet</servlet-name>
+        <servlet-class>lk.spark.ncms.controller.StatisticServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StatisticServlet</servlet-name>
+        <url-pattern>/statistic</url-pattern>
     </servlet-mapping>
 
 </web-app>

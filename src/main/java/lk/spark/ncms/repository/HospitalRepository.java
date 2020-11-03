@@ -1,12 +1,15 @@
 package lk.spark.ncms.repository;
 
 import lk.spark.ncms.dao.Hospital;
-import lk.spark.ncms.dao.HospitalsWithBed;
 import lk.spark.ncms.db.DBConnectionPool;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+
+import static java.util.Comparator.comparingDouble;
 
 public class HospitalRepository {
     public String registerHospital(Hospital hospitalInformation){
@@ -60,28 +63,33 @@ public class HospitalRepository {
 
     }
 
-    public ArrayList<HospitalsWithBed> getHospitalsWithBeds(){
+    public String[] assignedHospital(String nearestHospitalId, String patientId){
 
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement stmt = null;
-        String id = null;
-//        int test = 0;
+        int bedId = 0;
+        String hospitalId = "";
+        String [] result = new String[2];
+        HospitalBedRepository hospitalBedRepository = new HospitalBedRepository();
 
-        ArrayList<HospitalsWithBed> hospitalWithBedDetails = new ArrayList<>();
         try {
 
             con = DBConnectionPool.getInstance().getConnection();
-            stmt = con.prepareStatement("SELECT DISTINCT (id, location_x, location_y) FROM hospital INNER JOIN hospital_bed WHERE hospital.id = hospital_bed.hospital_id AND hospital_bed.patient_id = NULL ");
+            stmt = con.prepareStatement("SELECT DISTINCT id FROM hospital WHERE id != '"+nearestHospitalId+"'");
             rs = stmt.executeQuery();
-//            test = stmt.getFetchSize();
-            id = rs.getString("id");
 
-            while(rs.next()){
+            if(rs.next() == true){
+                while(rs.next()){
+                    if(bedId == 0){
+                        hospitalId = rs.getString("id");
+                        bedId =  hospitalBedRepository.getBedId(hospitalId, patientId);
+                    }
 
-                HospitalsWithBed hospitalsWithBed = new HospitalsWithBed(rs.getString(0), rs.getInt(1), rs.getInt(2));
-                hospitalWithBedDetails.add(hospitalsWithBed);
+                }
             }
+            result[0] = hospitalId;
+            result[1] = String.valueOf(bedId);
 
         }catch (SQLException e){
 
@@ -92,6 +100,58 @@ public class HospitalRepository {
             DBConnectionPool.getInstance().close(stmt);
             DBConnectionPool.getInstance().close(con);
         }
-        return hospitalWithBedDetails;
+        return result;
+    }
+
+    public String getNearestHospital(int patientXCoordinate, int patientYCoordinate){
+
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement stmt = null;
+        Map<String, Double> distance = new HashMap<String, Double>();
+        Double calculatedDistance ;
+        String nearestHospital = "";
+//        String id = null;
+//        String pDistrict  ;
+//        int test = 0;
+
+//        ArrayList<HospitalsWithBed> hospitalWithBedDetails = new ArrayList<>();
+        try {
+
+            con = DBConnectionPool.getInstance().getConnection();
+            stmt = con.prepareStatement("SELECT * FROM hospital");
+            rs = stmt.executeQuery();
+//            test = stmt.getFetchSize();
+//            id = rs.getString("id");
+
+            while(rs.next()){
+                String hospitalID = rs.getString("id");
+                Double hospitalXCoordinate = Double.parseDouble(rs.getString("location_x"));
+                Double hospitalYCoordinate = Double.parseDouble(rs.getString("location_y"));
+                Double patientXLoc = Double.parseDouble(String.valueOf(patientXCoordinate));
+                Double patientYLoc = Double.parseDouble(String.valueOf(patientYCoordinate));
+                double xDistance = (double) Math.pow(Math.abs(patientXLoc - hospitalXCoordinate), 2);
+                double yDistance = (double) Math.pow(Math.abs(patientYLoc - hospitalYCoordinate), 2);
+                calculatedDistance = (double) Math.sqrt(xDistance + yDistance);
+                distance.put(hospitalID, calculatedDistance);
+
+//                HospitalsWithBed hospitalsWithBed = new HospitalsWithBed(rs.getString(0), rs.getInt(1), rs.getInt(2));
+//                hospitalWithBedDetails.add(hospitalsWithBed);
+            }
+            nearestHospital = Collections.min(distance.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
+
+
+
+        }catch (SQLException e){
+
+            e.printStackTrace();
+        }finally {
+
+            DBConnectionPool.getInstance().close(rs);
+            DBConnectionPool.getInstance().close(stmt);
+            DBConnectionPool.getInstance().close(con);
+        }
+//        return hospitalWithBedDetails;
+        return nearestHospital;
     }
 }

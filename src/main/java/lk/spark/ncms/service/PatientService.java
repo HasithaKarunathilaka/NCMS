@@ -4,5 +4,5 @@ import lk.spark.ncms.dao.Patient;
 
 public interface PatientService {
 
-    public String registerPatient(Patient patientInformation);
+    public String[] registerPatient(Patient patientInformation);
 }
